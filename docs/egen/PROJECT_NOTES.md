@@ -100,3 +100,8 @@ Suivi : avancement hebdomadaire des phases.
 - [x] Phase 2 matrice (docs/egen/PHASE2-COMPATIBILITE.md)
 - [x] Fork amourgit/egen-character-factory créé
 - [ ] Phase 3 nettoyage / Phase 4 intégration — en attente de validation des choix React18/rspack/TS
+- [x] Choix validés par l'utilisateur: React18, rspack, TS entry, suppression blockchain+clés. EXIGENCE: aucune fonctionnalité supprimée/corrompue (hors blockchain validé). Baseline tests/build à comparer.
+- [x] Phase 3 faite (fork nettoyé, 37 tests OK, build OK, poussé). Blockchain CONSERVÉE (couplage fort) -> isoler plus tard via flag. Prochaine: Phase 4 dans packages/apps/esm-character-factory-app du Core
+- [~] Phase 4: app scaffold créée dans Core packages/apps/esm-character-factory-app (src/studio=upstream src, src/public=assets). Reste: yarn install, build rspack, fix erreurs, check-nav-routes, tests
+- [x] Phase4: build rspack dev OK (peers alignés Core, zustand-legacy isolé, loader CSS). Reste: tests, nav check, tsc, build prod, commit Core+fork, push
+- [x] Phase 4 poussée sur Core branche feature/character-factory (tests 37/37, tsc, build dev+prod, nav check OK). Reste: test navigateur réel, Phase 5 (identité + canvas dans zone shell), 6 stabilisation, 7 extension/blockchain flag, 8 validation
