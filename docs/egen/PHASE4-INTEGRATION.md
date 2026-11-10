@@ -26,3 +26,12 @@ Branche Core : `feature/character-factory` (amourgit/Frontend-esm-core) — app 
 - Sous-options (`topbar-nav-slot`) : Accueil (`character-factory`), Créer (`/creer`), Charger (`/charger`), Export par lot (`/export-lot`), Manifestes par lot (`/manifestes`) — reliées aux vues LANDING, CREATE, LOAD, BATCHDOWNLOAD, BATCHMANIFEST via `route-sync.tsx`. APPEARANCE/SAVE/OPTIMIZER restent des étapes internes du parcours.
 - i18n : espace de noms `character-factory` dans l'instance partagée du Core (en/fr/ru/zh).
 - Branding : titre, métadonnées d'export. Reste : thème (tokens `--colors-*`) sur les CSS hérités, visuels de la page d'accueil, panneaux d'édition vers les zones droite/basse.
+
+## Connexion au shell — récapitulatif des emplacements
+| Emplacement | Extension (routes.json) | Rôle |
+|---|---|---|
+| Zone principale | page `root`, route `character-factory` | éditeur 3D |
+| Grille « Applications » (TopBar) | `character-factory-app-menu-link` → `app-menu-slot` | tuile d'accès |
+| Niveau TopBar | 5× `topbar-nav-slot` (section `character-factory`, `sectionRoute`) | bouton de section + méga-menu (Personnages 3D / Production) |
+| Rail gauche → zone gauche | `character-factory-rail` → `shell-rail-left-slot` (global) | `SectionNavPanel` des sous-options |
+Test de cohérence : `tests/routes.test.js` (42 tests au total).
