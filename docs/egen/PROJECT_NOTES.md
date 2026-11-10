@@ -106,4 +106,5 @@ Suivi : avancement hebdomadaire des phases.
 - [x] Phase4: build rspack dev OK (peers alignés Core, zustand-legacy isolé, loader CSS). Reste: tests, nav check, tsc, build prod, commit Core+fork, push
 - [x] Phase 4 poussée
 - [x] Fix .gitignore lib + i18n Core (namespace character-factory, fr ajouté) poussé. Reste Phase 5: canvas dans zone shell (container+transform), rail panel, identité EGEN (App.jsx generalTitle 'Character Studio', download-utils authors)
-- [x] Phase 5 partie 1 poussée (rail, sous-options, route-sync, canvas dans zone, branding). Reste: thème tokens, visuels landing, panneaux -> zones droite/bas, test navigateur
+- [x] Connexion shell complète poussée (grille, topbar sectionRoute, rail, test routes). En attente du retour navigateur de l'utilisateur
+- [x] P6 partiel: dispose scène/audio/lookAt + cleanup route-sync (48 tests). Feuille de route détaillée P5-P15 écrite (docs/character-factory/ROADMAP-CHARACTER-FACTORY.md). Prochaine: P5 reste (thème tokens, visuels, 100vh) puis P6 F6.3-F6.5 puis P7 socle domaine. Décisions D1-D5 à valider par l'utilisateur.
