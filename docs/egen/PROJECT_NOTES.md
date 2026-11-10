@@ -104,4 +104,6 @@ Suivi : avancement hebdomadaire des phases.
 - [x] Phase 3 faite (fork nettoyé, 37 tests OK, build OK, poussé). Blockchain CONSERVÉE (couplage fort) -> isoler plus tard via flag. Prochaine: Phase 4 dans packages/apps/esm-character-factory-app du Core
 - [~] Phase 4: app scaffold créée dans Core packages/apps/esm-character-factory-app (src/studio=upstream src, src/public=assets). Reste: yarn install, build rspack, fix erreurs, check-nav-routes, tests
 - [x] Phase4: build rspack dev OK (peers alignés Core, zustand-legacy isolé, loader CSS). Reste: tests, nav check, tsc, build prod, commit Core+fork, push
-- [x] Phase 4 poussée sur Core branche feature/character-factory (tests 37/37, tsc, build dev+prod, nav check OK). Reste: test navigateur réel, Phase 5 (identité + canvas dans zone shell), 6 stabilisation, 7 extension/blockchain flag, 8 validation
+- [x] Phase 4 poussée
+- [x] Fix .gitignore lib + i18n Core (namespace character-factory, fr ajouté) poussé. Reste Phase 5: canvas dans zone shell (container+transform), rail panel, identité EGEN (App.jsx generalTitle 'Character Studio', download-utils authors)
+- [x] Phase 5 partie 1 poussée (rail, sous-options, route-sync, canvas dans zone, branding). Reste: thème tokens, visuels landing, panneaux -> zones droite/bas, test navigateur

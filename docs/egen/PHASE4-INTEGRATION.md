@@ -19,3 +19,10 @@ Branche Core : `feature/character-factory` (amourgit/Frontend-esm-core) — app 
 - Canvas 3D en `position: fixed` plein écran (comportement d'origine) : à intégrer proprement dans la zone principale du shell (Phase 5).
 - Blockchain conservée (NFT-lock, wallet, mint) : isolation par config en Phase 7.
 - Poids : ~115 Mo d'assets dans le dépôt Core (envisager Git LFS / CDN via `assetBaseUrl`).
+
+## Phase 5 (première partie) — Disposition dans le shell
+- Zone principale : page `root` (route `character-factory`) ; canvas 3D et panneaux hérités bornés à la zone (bloc contenant via `transform`, hauteur `100dvh - navbar - footer`) ; moteur 3D dimensionné sur son conteneur (ResizeObserver).
+- Rail gauche : option globale « Character Factory » (`shell-rail-left-slot`) → `SectionNavPanel section="character-factory"`.
+- Sous-options (`topbar-nav-slot`) : Accueil (`character-factory`), Créer (`/creer`), Charger (`/charger`), Export par lot (`/export-lot`), Manifestes par lot (`/manifestes`) — reliées aux vues LANDING, CREATE, LOAD, BATCHDOWNLOAD, BATCHMANIFEST via `route-sync.tsx`. APPEARANCE/SAVE/OPTIMIZER restent des étapes internes du parcours.
+- i18n : espace de noms `character-factory` dans l'instance partagée du Core (en/fr/ru/zh).
+- Branding : titre, métadonnées d'export. Reste : thème (tokens `--colors-*`) sur les CSS hérités, visuels de la page d'accueil, panneaux d'édition vers les zones droite/basse.
