@@ -114,3 +114,4 @@ Suivi : avancement hebdomadaire des phases.
 - [x] P8 bibliothèque (code) poussée, 101 tests. Partiel: filtre étiquettes UI, thumbnailsGenerator. Non validé navigateur: aperçu 3D. Prochaine: P9 compatibilité.
 - [x] Aperçu personnages + P9 compatibilité (122 tests). Validé navigateur par l'utilisateur: P8 sauf bouton aperçu personnages (corrigé, à revalider). Design à refaire plus tard (utilisateur). Prochaine: P10 composeur/compositions.
 - [x] P10 compositions poussée (131 tests). Partiel: couleurs/textures/morpho (moteur historique, engine-adapter inexistant), comparaison 3D. IndexedDB non validé navigateur. Prochaine: P11 animations/expressions/états (spike couches AnimationManager d'abord).
+- [x] UX compositions refaite (parcours guidé), 134 tests, poussée. Prochaine: P11 (états/animations) ou design (utilisateur: plus tard).
