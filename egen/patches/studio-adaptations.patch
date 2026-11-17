@@ -1,0 +1,472 @@
+diff --git a/App.jsx b/App.jsx
+index 673ff5a..50528ca 100644
+--- a/App.jsx
++++ b/App.jsx
+@@ -42,6 +42,15 @@ async function fetchManifest(location) {
+     }
+     
+     const data = await response.json();
++    // EGEN: les chemins "./..." du manifeste racine sont relatifs à la racine des assets de l'app
++    if (location === assetImportPath && Array.isArray(data?.characters)) {
++      const base = import.meta.env.VITE_ASSET_PATH
++      const fix = (u) => (typeof u === "string" && u.startsWith("./") ? base + u.slice(1) : u)
++      data.characters.forEach((c) => {
++        c.portrait = fix(c.portrait)
++        c.manifest = fix(c.manifest)
++      })
++    }
+     return data;
+   } catch (error) {
+     console.error(`Error fetching manifest: ${error.message}`);
+@@ -207,7 +216,7 @@ export default function App() {
+   return (
+     <Fragment>
+       
+-      <div className="generalTitle">Character Studio</div>
++      <div className="generalTitle">EGEN Character Factory</div>
+ 
+       {/* <LanguageSwitch /> */}
+       <MessageWindow
+diff --git a/Main.jsx b/a/Main.jsx
+deleted file mode 100644
+index ed503e5..0000000
+--- a/Main.jsx
++++ /dev/null
+@@ -1,45 +0,0 @@
+-import { Web3Provider } from "@ethersproject/providers"
+-import { Web3ReactProvider } from "@web3-react/core"
+-import React, { Suspense } from "react"
+-import ReactDOM from "react-dom/client"
+-import { AudioProvider } from "./context/AudioContext"
+-
+-import { AccountProvider } from "./context/AccountContext"
+-import { SceneProvider } from "./context/SceneContext"
+-import { ViewProvider } from "./context/ViewContext"
+-
+-import { SoundProvider } from "./context/SoundContext"
+-
+-// import i18n (needs to be bundled ;))
+-import "./lib/localization/i18n"
+-
+-import App from "./App"
+-import { LanguageProvider } from "./context/LanguageContext"
+-
+-const getLibrary = (provider) => {
+-  const library = new Web3Provider(provider)
+-  library.pollingInterval = 12000
+-  return library
+-}
+-
+-ReactDOM.createRoot(document.getElementById("root")).render(
+-  <React.StrictMode>
+-    <Web3ReactProvider getLibrary={getLibrary}>
+-      <AccountProvider>
+-        <LanguageProvider>
+-          <AudioProvider>
+-            <ViewProvider>
+-              <SceneProvider>
+-                <SoundProvider>
+-                  <Suspense>
+-                    <App />
+-                  </Suspense>
+-                </SoundProvider>
+-              </SceneProvider>
+-            </ViewProvider>
+-          </AudioProvider>
+-        </LanguageProvider>
+-      </AccountProvider>
+-    </Web3ReactProvider>
+-  </React.StrictMode>,
+-)
+diff --git a/components/Background.jsx b/components/Background.jsx
+index 94aacf3..53f29fb 100644
+--- a/components/Background.jsx
++++ b/components/Background.jsx
+@@ -6,6 +6,9 @@ export default function Background() {
+   const {
+     debugMode,
+   } = React.useContext(SceneContext)
++  // EGEN: le fond est fourni par le système d'arrière-plan du shell (voir src/shell-background.tsx).
++  // Le fond noir plein écran d'origine masquait celui du shell ; on ne le garde qu'en mode debug.
++  if (!debugMode) return null
+   return (
+     <div className={debugMode ? styles["darkBackground"] : styles["backgroundImg"]}>
+       <div className={styles["backgroundBlur"]}></div>
+diff --git a/context/AudioContext.jsx b/context/AudioContext.jsx
+index 5ea7351..91d484a 100644
+--- a/context/AudioContext.jsx
++++ b/context/AudioContext.jsx
+@@ -1,10 +1,25 @@
+-import React, {useState, createContext} from 'react';
++import React, {useState, useEffect, createContext} from 'react';
+ export const AudioContext = createContext();
+ import bgm from "../../public/sound/background/cc_bgm_balanced.wav"
+ 
+ export const AudioProvider = ({ children }) => {
+     const [isMute, setMute] = useState(false);
+     const audioRef = React.useRef(null);
++    const fadeRef = React.useRef(null);
++
++    // EGEN: un <audio> retiré du DOM continue de jouer ; on l'arrête (et son fondu) au démontage de l'app
++    // (l'élément est capturé au montage : au démontage React a déjà remis audioRef.current à null)
++    useEffect(() => {
++        const audio = audioRef.current
++        return () => {
++            clearInterval(fadeRef.current)
++            if (audio) {
++                audio.pause()
++                audio.removeAttribute('src')
++                audio.load?.()
++            }
++        }
++    }, [])
+ 
+     const enableAudio = () => {
+         setMute(false)
+@@ -18,7 +33,7 @@ export const AudioProvider = ({ children }) => {
+         // fade audio in over 5 seconds in 1/60th of a second intervals
+         let volume = 0.0
+         const seconds = 5.0
+-        const interval = setInterval(() => {
++        const interval = fadeRef.current = setInterval(() => {
+             volume = Math.max(volume + 1.0 / (10 * seconds * 60.0), 1.0)
+             if (volume >= 1.0) {
+                 clearInterval(interval)
+diff --git a/context/LanguageContext.jsx b/context/LanguageContext.jsx
+index 7907b39..5c16cfd 100644
+--- a/context/LanguageContext.jsx
++++ b/context/LanguageContext.jsx
+@@ -1,10 +1,11 @@
+ import React, { createContext } from "react"
+ import { useTranslation } from "react-i18next"
++import { STUDIO_NS } from "../lib/localization/i18n"
+ 
+ export const LanguageContext = createContext()
+ 
+ export const LanguageProvider = (props) => {
+-  const { t } = useTranslation()
++  const { t } = useTranslation(STUDIO_NS)
+ 
+   return (
+     <LanguageContext.Provider
+diff --git a/context/SceneContext.jsx b/context/SceneContext.jsx
+index d22f768..9dc6665 100644
+--- a/context/SceneContext.jsx
++++ b/context/SceneContext.jsx
+@@ -41,6 +41,7 @@ export const SceneProvider = (props) => {
+   const [debugMode, setDebugMode] = useState(false);
+ 
+   let loaded = false
++  let disposeScene = null
+   let [isLoaded, setIsLoaded] = useState(false)
+   useEffect(()=>{
+     // hacky prevention of double render
+@@ -53,8 +54,10 @@ export const SceneProvider = (props) => {
+       camera,
+       controls,
+       characterManager,
+-      sceneElements
++      sceneElements,
++      dispose
+     } = sceneInitializer("editor-scene");
++    disposeScene = dispose;
+     setCamera(camera);
+     setScene(scene);
+     setCharacterManager(characterManager);
+@@ -66,6 +69,8 @@ export const SceneProvider = (props) => {
+     setLoraDataGenerator(new LoraDataGenerator(characterManager))
+     setSpriteAtlasGenerator(new SpriteAtlasGenerator(characterManager))
+     setThumbnailsGenerator(new ThumbnailGenerator(characterManager))
++    // EGEN: libération de la scène 3D quand le shell démonte l'application
++    return () => { disposeScene?.() }
+   },[])
+ 
+ 
+diff --git a/lib/localization/i18n.js b/lib/localization/i18n.js
+index ee09ce8..b294952 100644
+--- a/lib/localization/i18n.js
++++ b/lib/localization/i18n.js
+@@ -1,21 +1,13 @@
+-import i18n from 'i18next';
+-import { initReactI18next } from 'react-i18next';
+-import LanguageDetector from 'i18next-browser-languagedetector';
+-import translations from './translations.json';
++// EGEN: CharacterStudio n'initialise plus sa propre instance i18next (ce qui aurait écrasé celle du shell
++// via initReactI18next). Ses traductions sont enregistrées comme un espace de noms dédié dans l'instance
++// i18n partagée du Core ; la langue suit donc celle du shell.
++import translations from './translations.json'
+ 
+-i18n
+-  // detect user language
+-  .use(LanguageDetector)
+-  // pass the i18n instance to react-i18next.
+-  .use(initReactI18next)
+-  // init i18next
+-  .init({
+-    debug: true,
+-    fallbackLng: 'en',
+-    interpolation: {
+-      escapeValue: false,
+-    },
+-    resources: translations
+-  });
++export const STUDIO_NS = 'character-factory'
+ 
+-export default i18n;
+\ No newline at end of file
++export function registerStudioTranslations(i18n) {
++  Object.entries(translations).forEach(([lng, resource]) => {
++    // deep=true, overwrite=false : idempotent, ne remplace pas ce qui existe déjà
++    i18n.addResourceBundle(lng, STUDIO_NS, resource.translation, true, false)
++  })
++}
+diff --git a/lib/localization/translations.json b/lib/localization/translations.json
+index b047c85..d4b8350 100644
+--- a/lib/localization/translations.json
++++ b/lib/localization/translations.json
+@@ -1,5 +1,4 @@
+ {
+-
+   "en": {
+     "translation": {
+       "pageTitles": {
+@@ -39,7 +38,6 @@
+       }
+     }
+   },
+-
+   "ru": {
+     "translation": {
+       "pageTitles": {
+@@ -79,7 +77,6 @@
+       }
+     }
+   },
+-
+   "zh": {
+     "translation": {
+       "pageTitles": {
+@@ -118,5 +115,44 @@
+         "apiUnderMaintnance": "语音生成API暂时关闭进行维护!"
+       }
+     }
++  },
++  "fr": {
++    "translation": {
++      "pageTitles": {
++        "chooseClass": "Choisir la classe du personnage",
++        "chooseAppearance": "Choisir l'apparence",
++        "saveCharacter": "Enregistrer votre personnage"
++      },
++      "callToAction": {
++        "next": "Suivant",
++        "back": "Retour",
++        "randomize": "Aléatoire",
++        "send": "Envoyer"
++      },
++      "editor": {
++        "title": "Apparence",
++        "head": "Tête",
++        "body": "Corps",
++        "eyes": "Yeux",
++        "outer": "Vêtement extérieur",
++        "chest": "Torse",
++        "legs": "Jambes",
++        "feet": "Pieds",
++        "accessories": "Accessoires"
++      },
++      "labels": {
++        "name": "Nom",
++        "voice": "Voix",
++        "favoriteColor": "Couleur favorite",
++        "preferredGreeting": "Salutation préférée",
++        "question": "Question",
++        "yourName": "Votre nom",
++        "conversation": "Conversation"
++      },
++      "text": {
++        "unoptimized": "Non optimisé",
++        "apiUnderMaintnance": "La génération vocale est temporairement désactivée pour maintenance !"
++      }
++    }
+   }
+-}
++}
+\ No newline at end of file
+diff --git a/library/characterManager.js b/library/characterManager.js
+index 10386e3..dfe974f 100644
+--- a/library/characterManager.js
++++ b/library/characterManager.js
+@@ -310,6 +310,15 @@ export class CharacterManager {
+       });
+       this.avatar = {};
+     }
++    /**
++     * EGEN: libération des ressources liées à cette instance (démontage de l'app).
++     * N'altère pas le comportement existant : méthode ajoutée, appelée uniquement par sceneInitializer.dispose().
++     */
++    dispose(){
++      try { this.removeCurrentManifest(); } catch (e) { console.warn(e); }
++      this.lookAtManager?.dispose?.();
++      this.animationManager?.dispose?.();
++    }
+     removeCurrentManifest(){
+       this.removeCurrentCharacter();
+       this.manifestDataManager.clearManifests();
+diff --git a/library/download-utils.js b/library/download-utils.js
+index 34f724b..3c3abb7 100644
+--- a/library/download-utils.js
++++ b/library/download-utils.js
+@@ -339,7 +339,7 @@ function getVRMMeta( vrmMeta){
+   vrmMeta = vrmMeta||{}
+ 
+   const defaults = {
+-    authors:["CharacterStudio"],
++    authors:["EGEN Character Factory"],
+     metaVersion:"1",
+     version:"v1",
+     name:"CharacterCreator",
+diff --git a/library/lookatManager.js b/library/lookatManager.js
+index b3cf635..ec66c68 100644
+--- a/library/lookatManager.js
++++ b/library/lookatManager.js
+@@ -30,21 +30,22 @@ export class LookAtManager {
+       left: {maxy:15, miny:20,maxx:35, minx:35},
+       right: {maxy:15, miny:20,maxx:35, minx:35},
+     }
+-    window.addEventListener("mousemove", (e)=>{
++    this._onMouseMove = (e)=>{
+       this.curMousePos = {x:e.clientX, y: e.clientY}
+-    })
++    }
++    window.addEventListener("mousemove", this._onMouseMove)
+     const canvasRef = document.getElementById(canvasID)
++    this._canvasRef = canvasRef
++    this._onMouseLeave = ()=>{ this.onCanvas = false; }
++    this._onMouseEnter = ()=>{ this.onCanvas = true; }
+     if (canvasRef){
+-      canvasRef.addEventListener("mouseleave", ()=>{
+-        this.onCanvas = false;
+-      })
+-      canvasRef.addEventListener("mouseenter", ()=>{
+-        this.onCanvas = true;
+-      })
++      canvasRef.addEventListener("mouseleave", this._onMouseLeave)
++      canvasRef.addEventListener("mouseenter", this._onMouseEnter)
+     }
+-    window.addEventListener("resize", () => {
++    this._onResize = () => {
+       this.hotzoneSection  = getHotzoneSection()
+-    });
++    }
++    window.addEventListener("resize", this._onResize);
+ 
+     function getHotzoneSection(){
+       const width = window.innerWidth * screenViewPercentage / 100
+@@ -181,4 +182,12 @@ export class LookAtManager {
+         })
+     }
+   }
++
++  // EGEN: retire les écouteurs globaux installés par le constructeur (démontage de l'app)
++  dispose(){
++    window.removeEventListener("mousemove", this._onMouseMove)
++    window.removeEventListener("resize", this._onResize)
++    this._canvasRef?.removeEventListener("mouseleave", this._onMouseLeave)
++    this._canvasRef?.removeEventListener("mouseenter", this._onMouseEnter)
++  }
+ }
+diff --git a/library/mint-utils.js b/library/mint-utils.js
+index e2c89ff..650860b 100644
+--- a/library/mint-utils.js
++++ b/library/mint-utils.js
+@@ -479,7 +479,7 @@ export async function mintAsset(avatar, screenshot, model, name, needCheckOT){
+         }
+         const metadata = {
+             name: name || "Avatars",
+-            description: "Character Studio Avatars.",
++            description: "EGEN Character Factory Avatars.",
+             image: `ipfs://${imageHash.IpfsHash}`,
+             animation_url: `ipfs://${glbHash.IpfsHash}`,
+             attributes: getAvatarTraits(avatar)
+diff --git a/library/sceneInitializer.js b/library/sceneInitializer.js
+index 730448c..840970c 100644
+--- a/library/sceneInitializer.js
++++ b/library/sceneInitializer.js
+@@ -60,20 +60,34 @@ export function sceneInitializer(canvasId) {
+     const minPan = new THREE.Vector3(-0.5, 0, -0.5);
+     const maxPan = new THREE.Vector3(0.5, 1.7, 0.5);
+ 
++    // EGEN: le canvas est monté dans la zone principale du shell, pas en plein écran : on suit la taille
++    // de son conteneur (et non celle de la fenêtre), y compris quand les rails/zones s'ouvrent ou se ferment.
+     const handleResize = () => {
+-        renderer.setSize(window.innerWidth, window.innerHeight);
+-        camera.aspect = window.innerWidth / window.innerHeight;
++        const parent = canvasRef?.parentElement;
++        const width = parent?.clientWidth || window.innerWidth;
++        const height = parent?.clientHeight || window.innerHeight;
++        renderer.setSize(width, height, false);
++        camera.aspect = width / height;
+         camera.updateProjectionMatrix();
+     };
+ 
+     window.addEventListener("resize", handleResize);
+-    renderer.setSize(window.innerWidth, window.innerHeight);
++    let resizeObserver = null;
++    if (typeof ResizeObserver !== "undefined" && canvasRef?.parentElement) {
++        resizeObserver = new ResizeObserver(handleResize);
++        resizeObserver.observe(canvasRef.parentElement);
++    }
+     renderer.setPixelRatio(window.devicePixelRatio);
++    handleResize();
+     renderer.outputColorSpace = THREE.SRGBColorSpace;
+ 
+     const clock = new THREE.Clock();
++    // EGEN: cycle de vie — la boucle doit pouvoir être arrêtée quand l'app est démontée par le shell
++    let disposed = false;
++    let rafId = 0;
+     const animate = () => {
+-        requestAnimationFrame(animate);
++        if (disposed) return;
++        rafId = requestAnimationFrame(animate);
+         const delta = clock.getDelta();
+         controls.target.clamp(minPan, maxPan);
+         controls?.update();
+@@ -107,12 +121,36 @@ export function sceneInitializer(canvasId) {
+     
+     canvasRef.addEventListener("click", handleMouseClick);
+ 
++    // EGEN: libère tout ce que cette initialisation a créé (boucle, écouteurs, GPU). Appelé au démontage.
++    const dispose = () => {
++        if (disposed) return;
++        disposed = true;
++        cancelAnimationFrame(rafId);
++        window.removeEventListener("resize", handleResize);
++        resizeObserver?.disconnect();
++        canvasRef?.removeEventListener("click", handleMouseClick);
++        controls.dispose();
++        try { characterManager.dispose?.(); } catch (e) { console.warn("characterManager.dispose", e); }
++        scene.traverse((obj) => {
++            obj.geometry?.dispose?.();
++            const materials = Array.isArray(obj.material) ? obj.material : obj.material ? [obj.material] : [];
++            materials.forEach((m) => {
++                Object.values(m).forEach((v) => { if (v && v.isTexture) v.dispose(); });
++                m.dispose?.();
++            });
++        });
++        scene.environment?.dispose?.();
++        renderer.dispose();
++        renderer.forceContextLoss();
++    };
++
+     return {
+         scene,
+         camera,
+         controls,
+         characterManager,
+         sceneElements,
+-        clock
++        clock,
++        dispose
+     };
+ }
