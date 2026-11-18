@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+build
+docs
+egen
+tests
+.env
+.env.*
+!.env.example
+.vscode
+*.md

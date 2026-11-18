@@ -1,0 +1,34 @@
+# EGEN Character Factory — déploiement.
+#   docker compose up -d --build
+#   (optionnel) bibliothèque de personnages locale :
+#   docker compose --profile assets run --rm assets-sync
+services:
+  app:
+    image: ${CHARACTER_IMAGE:-egen-character-factory:latest}
+    build:
+      context: .
+      args:
+        VITE_ASSET_PATH: ${VITE_ASSET_PATH:-./}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      # Bibliothèque de personnages, séparée de l'image (servie sous /loot-assets/).
+      - loot-assets:/srv/loot-assets:ro
+
+  # Remplit le volume avec M3-org/loot-assets (équivalent de `npm run get-assets`).
+  # À lancer à la main : les licences de cette bibliothèque sont à vérifier avant tout usage.
+  assets-sync:
+    profiles: ["assets"]
+    image: alpine/git:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        rm -rf /tmp/la /data/* /data/.[!.]* 2>/dev/null;
+        git clone --depth 1 --branch main ${LOOT_ASSETS_REPO:-https://github.com/M3-org/loot-assets.git} /tmp/la &&
+        rm -rf /tmp/la/.git && cp -r /tmp/la/. /data/ && chmod -R a+rX /data && echo "loot-assets synchronisé"
+    volumes:
+      - loot-assets:/data
+
+volumes:
+  loot-assets:
