@@ -2,7 +2,7 @@
 
 Application **externe** d'EGEN qui affiche une instance [EGEN Character Factory](https://github.com/amourgit/egen-character-factory) dans la zone principale du Core
 (route `character`), avec une option dans le rail gauche. C'est une enveloppe d'une centaine de lignes : EGEN Character Factory reste une
-application autonome, déployée à son adresse (Docker, voir `docs/egen-deploiement.md`), et embarquée par `iframe` via
+application autonome, déployée à son adresse (Docker, voir `docs/egen/DEPLOIEMENT.md`), et embarquée par `iframe` via
 [`@egen-civitas/esm-nextjs-utils`](https://www.npmjs.com/package/@egen-civitas/esm-nextjs-utils).
 
 C'est le scénario **C3** du document `docs/integration-apps/15-scenarios-integration-externe.md` du Core.

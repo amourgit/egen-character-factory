@@ -1,4 +1,24 @@
-# Character Studio
+# EGEN Character Factory
+
+> **Statut (2026-11-23).** Projet **autonome** de l'écosystème EGEN (CIVITAS), construit sur **CharacterStudio** (M3-org, MIT), implémentation de départ **remplaçable**.
+> Le Core EGEN ne contient plus aucun code de Character : il n'affiche que cette application, déployée à part, dans une iframe (enveloppe `integrations/egen/esm-character-app`, scénario C3 du doc 15 du Core).
+> Cette branche (`feature/reforme-character`) porte, en plus de l'amont : l'archive de l'intégration issue du Core (`egen/`), l'enveloppe d'application externe, l'image Docker et la CI.
+
+| Où | Contenu |
+|---|---|
+| `egen/README.md` | Archive de l'intégration d'origine (couche EGEN, patch des 12 fichiers adaptés) : **référence de reprise**, pas une application branchée |
+| `integrations/egen/esm-character-app/` | Enveloppe `@civitas/esm-character-app` (route `character`, iframe), 24 tests |
+| `Dockerfile`, `docker-compose.yml`, `nginx.conf.template`, `docker/` | Image de production : build Vite puis nginx statique, non-root, port 8080, santé `GET /health` ; `CHARACTER_FRAME_ANCESTORS` autorise l'iframe du Core (vide = aucun en-tête) |
+| `docs/egen/` | Contrats (`BACKEND-CONTRATS.md`), déploiement (`DEPLOIEMENT.md`), ADR, réforme |
+
+**Ce qui n'est pas vérifié.** L'image Docker est préparée mais **n'a jamais été construite** (aucun Docker dans l'environnement de travail ; les étapes du `Dockerfile` ont été rejouées à la main). L'affichage dans un navigateur, à l'intérieur du Core, n'est pas vérifié (WebGL).
+
+Licence : l'amont est sous MIT (`LICENSE`). Les ajouts EGEN se trouvent sous `egen/` et `integrations/egen/`.
+
+---
+
+# Documentation amont — CharacterStudio (M3-org)
+
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Discord](https://img.shields.io/discord/770382203782692945?label=Discord&logo=Discord)](https://discord.gg/8zBvTMb8SU)
