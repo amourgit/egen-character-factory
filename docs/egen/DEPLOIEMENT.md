@@ -70,3 +70,13 @@ Un manifeste racine personnalisé peut être monté par-dessus : `-v ./mon-manif
 Validé : `npm ci` à froid sans option (Node 20.20), 37 tests, build sans `.env`, argument `VITE_ASSET_PATH` pris en compte, configuration nginx exécutée sur le build réel
 (MIME, gzip, cache, `/health`, `/loot-assets/`, 404), script `assets-sync` rejoué (dont volume déjà rempli).
 **Non exécuté : `docker build` et `docker compose`** (Docker indisponible dans l'environnement de test).
+
+## Embarquement dans le Core EGEN (iframe)
+
+Character Factory est une **application externe** du Core EGEN (scénario C3 du doc 15 du Core). Le site étant statique, **aucune base de données ni backend** n'est requis.
+
+- **Autoriser le Core** : `CHARACTER_FRAME_ANCESTORS` (conteneur, `docker-compose.yml`) = origine(s) du Core, séparées par espaces ou virgules (`https://…` ou `http://localhost[:port]`). L'image calcule `Content-Security-Policy: frame-ancestors 'self' <origines>` au démarrage (`docker/15-egen-frame-ancestors.envsh`, modèle `nginx.conf.template`). Variable vide : aucun en-tête (comportement d'origine). Une origine invalide **empêche le démarrage** avec un message explicite.
+- **En local** : `npm run dev` (`http://localhost:5173`) ; aucune restriction d'iframe côté Vite.
+- **Enveloppe** : `integrations/egen/esm-character-app` (`@civitas/esm-character-app`, route `character`). Tag `egen-app-v<version>` → CI → tarball de release à déclarer dans `external-apps.json` du Core ; `characterUrl` dans la configuration du Core.
+- **Vérifier** : `sh docker/test-frame-ancestors.sh` (calcul de l'en-tête + `nginx -t` si nginx est installé).
+- Les assets 3D lourds (`/loot-assets/`) restent servis par ce service, jamais embarqués dans le tarball du Core.

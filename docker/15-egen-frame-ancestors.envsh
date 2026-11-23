@@ -1,0 +1,22 @@
+# EGEN — sourcé par l'entrypoint de l'image nginx AVANT le rendu des modèles (20-envsubst-on-templates.sh).
+# CHARACTER_FRAME_ANCESTORS : origines (séparées par espaces ou virgules) autorisées à afficher l'app en iframe.
+# Produit CHARACTER_FRAME_CSP (vide si non défini : aucun en-tête, comportement d'origine).
+CHARACTER_FRAME_CSP=""
+_origins=""
+for _o in $(printf '%s' "${CHARACTER_FRAME_ANCESTORS:-}" | tr ',' ' '); do
+  case "$_o" in
+    https://*) _re='^https://[A-Za-z0-9.-]+(:[0-9]+)?$' ;;
+    http://localhost*|http://127.0.0.1*) _re='^http://(localhost|127\.0\.0\.1)(:[0-9]+)?$' ;;
+    *) _re='^$' ;;
+  esac
+  if ! printf '%s' "$_o" | grep -Eq "$_re"; then
+    echo "CHARACTER_FRAME_ANCESTORS : origine refusée « $_o » (https://hote[:port], ou http://localhost[:port])." >&2
+    exit 1
+  fi
+  _origins="$_origins $_o"
+done
+if [ -n "$_origins" ]; then
+  CHARACTER_FRAME_CSP="frame-ancestors 'self'$_origins"
+fi
+export CHARACTER_FRAME_CSP
+unset _o _origins _re

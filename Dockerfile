@@ -20,7 +20,8 @@ RUN npm run build
 
 # --- Exécution
 FROM nginxinc/nginx-unprivileged:stable-alpine AS runner
-COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
+COPY --chown=nginx:nginx nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --chown=nginx:nginx --chmod=755 docker/15-egen-frame-ancestors.envsh /docker-entrypoint.d/15-egen-frame-ancestors.envsh
 COPY --from=build --chown=nginx:nginx /app/build /usr/share/nginx/html
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

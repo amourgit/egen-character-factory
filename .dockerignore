@@ -10,3 +10,5 @@ tests
 !.env.example
 .vscode
 *.md
+
+integrations

@@ -10,6 +10,9 @@ services:
       args:
         VITE_ASSET_PATH: ${VITE_ASSET_PATH:-./}
     restart: unless-stopped
+    environment:
+      # Origine(s) du Core EGEN autorisée(s) à afficher l'app en iframe (https, ou http://localhost). Vide = non autorisé.
+      CHARACTER_FRAME_ANCESTORS: ${CHARACTER_FRAME_ANCESTORS:-}
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes:

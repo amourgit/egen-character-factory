@@ -1,4 +1,4 @@
-# EGEN Character Factory — site statique.
+# EGEN Character Factory — site statique (modèle nginx : rendu au démarrage par l'image nginx, variables d'environnement substituées).
 # Ce fichier est inclus dans le contexte http : ces types s'ajoutent à /etc/nginx/mime.types.
 # (.vrm / .fbx : application/octet-stream par défaut ; .wasm est déjà déclaré.)
 types {
@@ -22,6 +22,9 @@ server {
 
   add_header X-Content-Type-Options "nosniff" always;
   add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  # EGEN : embarquement en iframe dans le Core (CHARACTER_FRAME_ANCESTORS, voir docker/15-egen-frame-ancestors.envsh).
+  # Valeur vide = en-tête absent = comportement d'origine.
+  add_header Content-Security-Policy "${CHARACTER_FRAME_CSP}" always;
 
   # Sonde de santé
   location = /health {
