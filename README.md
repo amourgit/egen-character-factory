@@ -2,7 +2,7 @@
 
 > **Statut (2026-11-23).** Projet **autonome** de l'écosystème EGEN (CIVITAS), construit sur **CharacterStudio** (M3-org, MIT), implémentation de départ **remplaçable**.
 > Le Core EGEN ne contient plus aucun code de Character : il n'affiche que cette application, déployée à part, dans une iframe (enveloppe `integrations/egen/esm-character-app`, scénario C3 du doc 15 du Core).
-> Cette branche (`feature/reforme-character`) porte, en plus de l'amont : l'archive de l'intégration issue du Core (`egen/`), l'enveloppe d'application externe, l'image Docker et la CI.
+> `main` porte, en plus de l'amont : l'archive de l'intégration issue du Core (`egen/`), l'enveloppe d'application externe, l'image Docker et la CI.
 
 | Où | Contenu |
 |---|---|

@@ -8,7 +8,6 @@ et la **bibliothèque de personnages (`loot-assets`) est séparée** : un volume
 ```bash
 git clone https://github.com/amourgit/egen-character-factory.git
 cd egen-character-factory
-git checkout feature/reforme-character
 docker compose up -d --build            # http://localhost:8080  (santé : /health)
 ```
 
