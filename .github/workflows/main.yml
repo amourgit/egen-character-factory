@@ -1,9 +1,12 @@
-name: Deploy to GitHub Pages
+name: Tests
 
+# Le déploiement GitHub Pages de l'amont (CharacterStudio, domaine studio.m3org.com) est retiré :
+# EGEN Character Factory est déployé à part, par image Docker (voir docs/egen/DEPLOIEMENT.md).
 on:
   push:
     branches:
-      - main # or the branch you want to trigger the deployment on
+      - main
+  pull_request:
 
 jobs:
   test:
@@ -23,31 +26,3 @@ jobs:
 
       - name: Run tests
         run: npm run test:run
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # or the version you need
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Build
-        run: npm run build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_dir: ./build
-          cname: studio.m3org.com
