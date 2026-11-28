@@ -13,6 +13,8 @@ services:
     environment:
       # Origine(s) du Core EGEN autorisée(s) à afficher l'app en iframe (https, ou http://localhost). Vide = non autorisé.
       CHARACTER_FRAME_ANCESTORS: ${CHARACTER_FRAME_ANCESTORS:-}
+      # URL publique de cette instance (https, ou http://localhost) : publiée dans /egen-config.json pour le Core. Vide = non publiée.
+      CHARACTER_PUBLIC_URL: ${CHARACTER_PUBLIC_URL:-}
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes:
