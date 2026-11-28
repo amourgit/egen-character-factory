@@ -36,6 +36,8 @@ server {
   # Point d'entrée et manifestes de personnages : toujours revalidés
   location = /index.html { expires -1; }
   location ~ ^/(manifest[^/]*\.json)$ { expires -1; }
+  # EGEN : déclaration d'intégration et origines du Shell, générées au démarrage (16-egen-embed.sh) : jamais en cache
+  location ~ ^/(egen-config|egen-host-origins)\.json$ { expires -1; add_header Cache-Control "no-store" always; add_header X-Content-Type-Options "nosniff" always; add_header Content-Security-Policy "${CHARACTER_FRAME_CSP}" always; }
 
   # Bundles Vite (nom + empreinte) : cache long
   location ~ "^/assets/[^/]+-[A-Za-z0-9_-]{8}\.(js|css)$" { expires 1y; }

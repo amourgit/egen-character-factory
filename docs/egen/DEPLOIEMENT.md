@@ -72,10 +72,10 @@ Validé : `npm ci` à froid sans option (Node 20.20), 37 tests, build sans `.env
 
 ## Embarquement dans le Core EGEN (iframe)
 
-Character Factory est une **application externe** du Core EGEN (scénario C3 du doc 15 du Core). Le site étant statique, **aucune base de données ni backend** n'est requis.
+Character Factory est une **application embarquée** du Core EGEN : une app autonome dans une iframe qui parle au Core par le SDK `@egen-civitas/esm-embed-client` (protocole v2). Le site étant statique, **aucune base de données ni backend** n'est requis. Voie unique : plus d'enveloppe, plus de tarball.
 
 - **Autoriser le Core** : `CHARACTER_FRAME_ANCESTORS` (conteneur, `docker-compose.yml`) = origine(s) du Core, séparées par espaces ou virgules (`https://…` ou `http://localhost[:port]`). L'image calcule `Content-Security-Policy: frame-ancestors 'self' <origines>` au démarrage (`docker/15-egen-frame-ancestors.envsh`, modèle `nginx.conf.template`). Variable vide : aucun en-tête (comportement d'origine). Une origine invalide **empêche le démarrage** avec un message explicite.
 - **En local** : `npm run dev` (`http://localhost:5173`) ; aucune restriction d'iframe côté Vite.
-- **Enveloppe** : `integrations/egen/esm-character-app` (`@civitas/esm-character-app`, route `character`). Tag `egen-app-v<version>` → CI → tarball de release à déclarer dans `external-apps.json` du Core ; `characterUrl` dans la configuration du Core.
-- **Vérifier** : `sh docker/test-frame-ancestors.sh` (calcul de l'en-tête + `nginx -t` si nginx est installé).
+- **Déclaration** : l'image publie au démarrage `/egen-config.json` (route `character`, navigation `none`, rail gauche, droits d'iframe **demandés**) à partir de `CHARACTER_PUBLIC_URL` (https, ou `http://localhost`) et `/egen-host-origins.json` (= `CHARACTER_FRAME_ANCESTORS`). Variables vides : rien n'est publié. Côté Core, l'opérateur déclare l'entrée `embed` (`manifest` = `<URL>/egen-config.json`) et **approuve** les droits (`grants`, dont `iframe`), puis `yarn external:sync`. L'app suit la langue du Core (`en`, `ru`, `zh` ; sinon elle garde la sienne).
+- **Vérifier** : `sh docker/test-frame-ancestors.sh` (en-tête `frame-ancestors`) ; `npm test` (déclaration valide selon le protocole, script de démarrage `docker/16-egen-embed.sh`).
 - Les assets 3D lourds (`/loot-assets/`) restent servis par ce service, jamais embarqués dans le tarball du Core.

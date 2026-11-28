@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "name": "@civitas/esm-character-app",
+  "version": "1.0.0",
+  "title": "EGEN Character Factory",
+  "url": "__CHARACTER_PUBLIC_URL__",
+  "route": "character",
+  "technology": "react",
+  "navigation": { "mode": "none" },
+  "placement": { "rail": "left", "group": "conception", "icon": "UserRound" },
+  "capabilities": { "locale": {} },
+  "iframe": {
+    "sandbox": ["allow-downloads", "allow-modals", "allow-popups-to-escape-sandbox"],
+    "allow": ["clipboard-read", "clipboard-write", "fullscreen"]
+  },
+  "config": {}
+}

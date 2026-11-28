@@ -8,8 +8,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.js'],
     globals: true,
     css: true,
-    // integrations/ (enveloppe d'app externe : tests et dépendances propres) et egen/ (archive de référence, non installable seule).
-    exclude: [...configDefaults.exclude, 'integrations/**', 'egen/**'],
+    // egen/ : archive de référence, non installable seule.
+    exclude: [...configDefaults.exclude, 'egen/**'],
   },
   resolve: {
     alias: {

@@ -15,6 +15,7 @@ import "./lib/localization/i18n"
 
 import App from "./App"
 import { LanguageProvider } from "./context/LanguageContext"
+import EgenIntegration from "./egen/EgenIntegration"
 
 const getLibrary = (provider) => {
   const library = new Web3Provider(provider)
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <SceneProvider>
                 <SoundProvider>
                   <Suspense>
+                    <EgenIntegration />
                     <App />
                   </Suspense>
                 </SoundProvider>
