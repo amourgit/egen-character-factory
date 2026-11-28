@@ -60,7 +60,6 @@ Un manifeste racine personnalisé peut être monté par-dessus : `-v ./mon-manif
 - Code de l'application, identité visuelle, assets embarqués : identiques à l'amont.
 - Fonctions NFT / wallet / mint (variables `VITE_HELIUS_KEY`, `VITE_OPENSEA_KEY`, `VITE_PINATA_*`, `VITE_VALIDATION_SERVER_URL`) : non configurées, donc inactives. Leur retrait relève de la réforme (phase 15 du plan), pas du déploiement.
 - `.env` (versionné par l'amont, valeur `VITE_ASSET_PATH=./`) et `.github/workflows/main.yml` (publication GitHub Pages sur `main` uniquement) : laissés tels quels. `.dockerignore` exclut `.env*` de l'image.
-- L'archive `egen/` (intégration issue du Core) n'est pas incluse dans l'image.
 
 ## Changements apportés pour le déploiement
 `.npmrc` (`legacy-peer-deps`, `engine-strict`), `.nvmrc`, champ `engines` de `package.json`, `Dockerfile`, `nginx.conf`, `docker-compose.yml`, `.dockerignore`.
