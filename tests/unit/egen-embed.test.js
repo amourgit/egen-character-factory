@@ -39,7 +39,7 @@ describe("déclaration egen-config.json (gabarit)", () => {
       route: "character",
       technology: "react",
       navigation: { mode: "none" },
-      placement: { rail: "left", group: "conception", icon: "UserRound" },
+      placement: { rail: "left", group: "Conception", icon: "UserRound" },
     })
   })
 

@@ -7,7 +7,7 @@
   "route": "character",
   "technology": "react",
   "navigation": { "mode": "none" },
-  "placement": { "rail": "left", "group": "conception", "icon": "UserRound" },
+  "placement": { "rail": "left", "group": "Conception", "icon": "UserRound" },
   "capabilities": { "locale": {} },
   "iframe": {
     "sandbox": ["allow-downloads", "allow-modals", "allow-popups-to-escape-sandbox"],
